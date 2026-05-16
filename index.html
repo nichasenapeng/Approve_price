@@ -749,7 +749,35 @@ function vote(ref, slot, dec) {
   if (!curKey) { showToast('กรุณาเข้าสู่ระบบก่อน'); return; }
   if (!approvals[ref]) approvals[ref] = {};
   approvals[ref][slot] = dec;
-  showToast(dec === 'approved' ? '✅ ' + slot + ' อนุมัติสำเร็จ' : '❌ ' + slot + ' ปฏิเสธสำเร็จ', dec === 'approved' ? 'green' : 'red');
+
+  // หาข้อมูล card นี้
+  var d = DATA.filter(function(x){ return x.ref === ref; })[0] || {};
+  var av = approvals[ref];
+  var status = getStatus(ref);
+  var rem = document.getElementById('rem-' + ref);
+
+  // ส่งไป Apps Script → บันทึกลง Sheet ใหม่
+  var payload = {
+    ref:        ref,
+    company:    d.company || '',
+    port:       d.port || '',
+    product:    (d.products && d.products[0]) ? d.products[0].type : '',
+    offerPrice: d.offerPrice || '',
+    offerMargin:d.offerMargin || '',
+    qtyMonth:   d.qtyMonth || '',
+    period:     d.period || '',
+    A1:         av.A1 || '',
+    A2:         av.A2 || '',
+    status:     status,
+    remark:     rem ? rem.value : ''
+  };
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }).catch(function(){});  // silent fail — approval ยังทำงานใน UI
+
+  showToast(dec === 'approved' ? '✅ ' + slot + ' อนุมัติสำเร็จ — บันทึกแล้ว' : '❌ ' + slot + ' ปฏิเสธ — บันทึกแล้ว', dec === 'approved' ? 'green' : 'red');
   renderCards();
 }
 
