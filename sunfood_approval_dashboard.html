@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offer Approval — SunFood</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:       #c0152a;
+  --red-dark:  #8b0e1e;
+  --red-light: #fde8eb;
+  --red-mid:   #e8192e;
+  --white:     #ffffff;
+  --off-white: #fafafa;
+  --bg:        #f5f5f5;
+  --border:    #e8e8e8;
+  --ink:       #1a1a1a;
+  --ink-soft:  #444444;
+  --ink-muted: #888888;
+  --green:     #0d7a4e;
+  --green-light: #e6f7f0;
+  --yellow:    #b45309;
+  --yellow-light: #fef3c7;
+  --radius:    14px;
+  --radius-sm: 8px;
+  --shadow:    0 1px 4px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px}
+
+/* ── LOGIN ── */
+.login-overlay{
+  position:fixed;inset:0;z-index:700;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#8b0e1e 0%,#c0152a 45%,#8b0e1e 100%);
+}
+/* decorative blobs */
+.login-overlay::before,.login-overlay::after{
+  content:'';position:absolute;border-radius:50%;pointer-events:none;
+  background:rgba(255,255,255,0.06);
+}
+.login-overlay::before{width:420px;height:420px;top:-80px;right:-80px}
+.login-overlay::after {width:300px;height:300px;bottom:-60px;left:-60px}
+
+.login-box{
+  position:relative;z-index:2;width:340px;
+  background:var(--white);border-radius:20px;padding:44px 36px 36px;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,0.35);
+  animation:popIn .45s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{transform:scale(.88) translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.login-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--red-dark),var(--red-mid),var(--red-dark));
+  border-radius:20px 20px 0 0;
+}
+.login-logo{font-family:"Kanit",sans-serif;font-size:34px;font-weight:700;color:var(--ink);letter-spacing:.14em}
+.login-logo span{color:var(--red)}
+.login-sub{font-size:11px;color:var(--ink-muted);letter-spacing:.12em;text-transform:uppercase;margin:6px 0 28px}
+
+
+.pw-wrap{position:relative;margin-bottom:10px}
+.pw-input{
+  width:100%;padding:13px 16px;text-align:center;letter-spacing:.25em;
+  background:var(--off-white);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:18px;color:var(--ink);
+  font-family:"Sarabun",sans-serif;transition:all .2s;
+}
+.pw-input::placeholder{letter-spacing:.06em;color:var(--ink-muted);font-size:13px}
+.pw-input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 4px rgba(192,21,42,.12)}
+.pw-err{font-size:12px;color:var(--red);margin-bottom:10px;display:none;font-weight:500}
+.pw-err.show{display:block}
+
+.btn-login{
+  width:100%;padding:14px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--red),var(--red-dark));
+  border:none;color:var(--white);
+  font-family:"Kanit",sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;letter-spacing:.07em;transition:all .25s;
+  box-shadow:0 6px 20px rgba(192,21,42,.35);
+}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(192,21,42,.45)}
+.login-footer{font-size:10px;color:var(--ink-muted);letter-spacing:.07em;margin-top:18px}
+
+/* ── HEADER ── */
+.site-header{
+  position:sticky;top:0;z-index:100;height:54px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+  background:var(--red);
+  box-shadow:0 2px 12px rgba(192,21,42,.3);
+}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr-brand{font-family:"Kanit",sans-serif;font-size:19px;font-weight:700;color:var(--white);letter-spacing:.14em}
+.hdr-brand span{color:rgba(255,255,255,.65)}
+.hdr-divider{width:1px;height:24px;background:rgba(255,255,255,.3)}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.7);letter-spacing:.08em;text-transform:uppercase}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.user-pill{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+  border-radius:24px;padding:5px 14px;
+  font-family:"Kanit",sans-serif;font-size:12px;color:var(--white);font-weight:500;
+}
+.udot{width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 5px rgba(255,255,255,.8)}
+.btn-refresh{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:rgba(255,255,255,.9);padding:5px 14px;border-radius:20px;
+  font-size:11px;cursor:pointer;transition:all .2s;font-family:"Sarabun",sans-serif;
+}
+.btn-refresh:hover{background:rgba(255,255,255,.28);color:var(--white)}
+.btn-logout{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:rgba(255,255,255,.85);padding:5px 14px;border-radius:20px;
+  font-size:11px;cursor:pointer;transition:all .2s;font-family:"Sarabun",sans-serif;
+}
+.btn-logout:hover{background:rgba(255,255,255,.28);color:var(--white)}
+
+/* ── SUMMARY BAR ── */
+.summary-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  padding:18px 24px;background:var(--white);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.stat-card{
+  background:var(--off-white);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+}
+.stat-icon{font-size:22px}
+.stat-label{font-size:10px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em}
+.stat-value{font-family:"Bebas Neue",sans-serif;font-size:30px;color:var(--ink);letter-spacing:.03em;line-height:1}
+.stat-sub{font-size:11px;color:var(--ink-muted);margin-top:2px}
+
+/* ── FILTER BAR ── */
+.filter-bar{
+  display:flex;align-items:center;gap:8px;padding:10px 24px;flex-wrap:wrap;
+  background:var(--white);border-bottom:1px solid var(--border);
+}
+.filter-label{font-size:11px;color:var(--ink-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.filter-btn{
+  padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);
+  background:var(--white);font-size:12px;color:var(--ink-soft);
+  cursor:pointer;transition:all .18s;font-family:"Sarabun",sans-serif;font-weight:500;
+}
+.filter-btn:hover{border-color:var(--red);color:var(--red)}
+.filter-btn.active{background:var(--red);border-color:var(--red);color:var(--white);box-shadow:0 2px 8px rgba(192,21,42,.25)}
+
+/* ── SECTION HEADING ── */
+.section-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px 8px;
+}
+.section-heading h2{font-family:"Kanit",sans-serif;font-size:15px;font-weight:600;color:var(--ink-soft)}
+.section-count{font-size:12px;color:var(--ink-muted)}
+
+/* ── MAIN ── */
+.main{padding:4px 24px 80px;max-width:1400px}
+
+/* ── OFFER CARD ── */
+.offer-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:14px;
+  box-shadow:var(--shadow);overflow:hidden;
+  transition:box-shadow .2s,transform .2s;
+}
+.offer-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.offer-card.status-approved{border-left:5px solid var(--green)}
+.offer-card.status-rejected{border-left:5px solid var(--red)}
+.offer-card.status-pending {border-left:5px solid var(--yellow)}
+.offer-card.status-partial {border-left:5px solid #2563eb}
+
+/* card top stripe */
+.card-stripe{height:3px}
+.stripe-pending {background:linear-gradient(90deg,var(--yellow),#f59e0b)}
+.stripe-approved{background:linear-gradient(90deg,var(--green),#10b981)}
+.stripe-rejected{background:linear-gradient(90deg,var(--red-dark),var(--red))}
+.stripe-partial {background:linear-gradient(90deg,#1d4ed8,#3b82f6)}
+
+.card-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:16px 20px 12px;gap:12px;border-bottom:1px solid var(--border);
+}
+.card-ref{font-family:"Kanit",sans-serif;font-size:11px;font-weight:600;color:var(--red);letter-spacing:.08em}
+.card-company{font-family:"Kanit",sans-serif;font-size:20px;font-weight:700;color:var(--ink);margin:2px 0}
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.tag{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;
+}
+.tag-incoterm{background:#f3f4f6;color:var(--ink-soft);border:1px solid var(--border)}
+.tag-payment {background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.tag-port    {background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.tag-sales   {background:var(--red-light);color:var(--red);border:1px solid #fca5a5}
+.tag-order   {background:#faf5ff;color:#6d28d9;border:1px solid #ddd6fe}
+.tag-country {background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+
+.card-status-area{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0}
+.status-badge{
+  padding:4px 13px;border-radius:20px;font-size:11px;font-weight:600;
+  font-family:"Kanit",sans-serif;letter-spacing:.04em;
+}
+.badge-pending {background:var(--yellow-light);color:var(--yellow);border:1px solid #fde68a}
+.badge-approved{background:var(--green-light);color:var(--green);border:1px solid #a7f3d0}
+.badge-rejected{background:var(--red-light);color:var(--red);border:1px solid #fca5a5}
+.badge-partial {background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+.card-ts{font-size:11px;color:var(--ink-muted)}
+
+/* offer detail strip */
+.offer-detail{
+  display:flex;gap:0;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);
+}
+.detail-cell{
+  padding:10px 18px;flex:1;min-width:120px;
+  border-right:1px solid var(--border);
+}
+.detail-cell:last-child{border-right:none}
+.dl{font-size:10px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em}
+.dv{font-family:"Kanit",sans-serif;font-size:15px;font-weight:600;color:var(--ink);margin-top:2px}
+.dv-red{color:var(--red)}
+.dv-green{color:var(--green)}
+
+/* product table */
+.card-products{padding:4px 20px 14px}
+.prod-lbl{font-size:10px;font-weight:600;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;padding:12px 0 8px}
+.prod-table{width:100%;border-collapse:collapse}
+.prod-table th{
+  font-size:10px;font-weight:600;color:var(--ink-muted);text-transform:uppercase;
+  letter-spacing:.05em;text-align:left;padding:7px 10px;
+  background:#fafafa;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.prod-table td{padding:9px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+.prod-table tr:last-child td{border-bottom:none}
+.pt{font-weight:600;color:var(--ink)}
+.pc{font-family:"Bebas Neue",sans-serif;font-size:12px;color:var(--ink-muted);letter-spacing:.05em}
+.pv{font-family:"Bebas Neue",sans-serif;font-size:16px;color:var(--red);letter-spacing:.02em}
+.mg{font-size:12px;font-weight:700}
+.mg-h{color:var(--green)}.mg-m{color:var(--yellow)}.mg-l{color:var(--red)}
+
+/* history */
+.hist-section{
+  margin:0 20px 12px;
+  background:#fffbeb;border:1px solid #fde68a;
+  border-radius:var(--radius-sm);padding:9px 14px;font-size:12px;color:#92400e;
+}
+.hist-section strong{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;color:#b45309}
+
+/* remark */
+.remark-row{margin:0 20px 14px;font-size:12px;color:var(--ink-soft);
+  background:#f9fafb;border-left:3px solid var(--border);padding:8px 12px;border-radius:0 6px 6px 0}
+
+/* approve section */
+.approve-section{
+  border-top:1px solid var(--border);padding:14px 20px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;background:#fafafa;
+}
+.approve-slots{ display:flex; align-items:center; gap:0; flex:1; }
+.vote-slot-wrap{ flex:1; padding:0 14px; }
+.vote-slot-wrap:first-child{ padding-left:0; }
+.slot-label{
+  font-size:11px;font-weight:700;color:var(--ink-muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;
+}
+.slot-divider{ width:1px; height:60px; background:var(--border); flex-shrink:0; }
+.vote-buttons{display:flex;gap:8px}
+.vote-btn{
+  padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:all .18s;
+  font-family:"Kanit",sans-serif;display:flex;align-items:center;gap:5px;
+  letter-spacing:.02em;
+}
+.btn-approve{background:var(--green-light);color:var(--green);border:1.5px solid #a7f3d0}
+.btn-approve:hover{background:var(--green);color:#fff;transform:translateY(-1px);box-shadow:0 4px 14px rgba(13,122,78,.3)}
+.btn-reject{background:var(--red-light);color:var(--red);border:1.5px solid #fca5a5}
+.btn-reject:hover{background:var(--red);color:#fff;transform:translateY(-1px);box-shadow:0 4px 14px rgba(192,21,42,.3)}
+.vote-result{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:"Kanit",sans-serif;font-size:13px;font-weight:600;
+  padding:8px 14px;border-radius:8px;
+}
+.vote-result.approved{background:var(--green-light);color:var(--green);border:1px solid #a7f3d0}
+.vote-result.rejected{background:var(--red-light);color:var(--red);border:1px solid #fca5a5}
+.btn-undo{
+  font-size:11px;font-weight:500;color:var(--ink-muted);
+  background:rgba(0,0,0,.06);border:1px solid var(--border);
+  padding:3px 9px;border-radius:5px;cursor:pointer;
+  font-family:"Sarabun",sans-serif;transition:all .15s;
+}
+.btn-undo:hover{background:rgba(0,0,0,.12);color:var(--ink)}
+.badge-partial{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+
+.remark-area{flex:1;min-width:190px}
+.remark-area label{font-size:10px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px}
+.remark-area textarea{
+  width:100%;padding:8px 12px;background:var(--white);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  font-size:13px;font-family:"Sarabun",sans-serif;resize:none;height:62px;color:var(--ink);
+}
+.remark-area textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(192,21,42,.1)}
+
+/* empty */
+.empty-state{text-align:center;padding:60px 24px;color:var(--ink-muted)}
+.empty-state .ei{font-size:48px;margin-bottom:12px;opacity:.4}
+.empty-state h3{font-family:"Kanit",sans-serif;font-size:18px;color:var(--ink-soft)}
+
+/* toast */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  padding:12px 22px;border-radius:var(--radius-sm);
+  font-family:"Kanit",sans-serif;font-size:14px;color:#fff;
+  background:var(--ink);box-shadow:0 8px 24px rgba(0,0,0,.22);
+  opacity:0;transform:translateY(14px);transition:all .28s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.green{background:var(--green)}
+.toast.red  {background:var(--red)}
+
+/* test data badge */
+.test-badge{
+  display:inline-block;font-size:10px;font-weight:700;
+  background:#fef3c7;color:#92400e;border:1px solid #fde68a;
+  border-radius:4px;padding:1px 7px;letter-spacing:.05em;margin-left:8px;
+  vertical-align:middle;
+}
+
+@media(max-width:768px){
+  .summary-bar{grid-template-columns:1fr 1fr}
+  .approve-votes{flex-direction:column}
+  .card-header{flex-direction:column}
+  .offer-detail{flex-direction:column}
+  .detail-cell{border-right:none;border-bottom:1px solid var(--border)}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">SUN<span>FOOD</span></div>
+    <div class="login-sub">Offer Approval System</div>
+
+    <div class="pw-wrap" style="margin-bottom:12px">
+      <input class="pw-input" id="pw" type="password" placeholder="รหัสผ่าน" maxlength="20"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="pw-err" id="pw-err">❌ รหัสผ่านไม่ถูกต้อง</div>
+    <button class="btn-login" onclick="doLogin()">เข้าสู่ระบบ →</button>
+    <div class="login-footer">SUNFOOD INTERNATIONAL · OFFER APPROVAL DASHBOARD</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="site-header">
+  <div class="hdr-left">
+    <div class="hdr-brand">SUN<span>FOOD</span></div>
+    <div class="hdr-divider"></div>
+    <div class="hdr-sub">Offer Approval Dashboard</div>
+  </div>
+  <div class="hdr-right">
+    <span id="last-updated" style="font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.04em"></span>
+    <button class="btn-refresh" onclick="loadData()" title="รีเฟรชข้อมูล">🔄 รีเฟรช</button>
+    <div class="user-pill"><div class="udot"></div><span id="hdr-user">—</span></div>
+    <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-bar">
+  <div class="stat-card"><div class="stat-icon">📋</div><div><div class="stat-label">ทั้งหมด</div><div class="stat-value" id="st-total">0</div><div class="stat-sub">Offer Requests</div></div></div>
+  <div class="stat-card"><div class="stat-icon">⏳</div><div><div class="stat-label">รออนุมัติ</div><div class="stat-value" id="st-pend" style="color:var(--yellow)">0</div><div class="stat-sub">Pending</div></div></div>
+  <div class="stat-card"><div class="stat-icon">✅</div><div><div class="stat-label">อนุมัติแล้ว</div><div class="stat-value" id="st-appr" style="color:var(--green)">0</div><div class="stat-sub">Approved</div></div></div>
+  <div class="stat-card"><div class="stat-icon">❌</div><div><div class="stat-label">ปฏิเสธ</div><div class="stat-value" id="st-rej" style="color:var(--red)">0</div><div class="stat-sub">Rejected</div></div></div>
+</div>
+
+<!-- FILTER -->
+<div class="filter-bar">
+  <span class="filter-label">กรอง:</span>
+  <button class="filter-btn active" id="filter-pending"  onclick="setFilter('pending',this)">⏳ รออนุมัติ</button>
+  <button class="filter-btn" id="filter-partial"  onclick="setFilter('partial',this)">✅ Approve 1 แล้ว</button>
+  <button class="filter-btn" id="filter-approved" onclick="setFilter('approved',this)">✅✅ อนุมัติครบ</button>
+  <button class="filter-btn" id="filter-rejected" onclick="setFilter('rejected',this)">❌ ปฏิเสธ</button>
+</div>
+
+<div class="section-heading">
+  <h2>📝 Offer Requests</h2>
+  <span class="section-count" id="sec-count">—</span>
+</div>
+
+<div class="main" id="cards"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var PASS = '1234';
+var curUser = null, curKey = null, curFilter = 'pending';
+var approvals = {};
+
+// ── LIVE DATA จาก Google Sheets via Apps Script ──
+var API_URL = 'https://script.google.com/macros/s/AKfycbwX2cxpdPFlA9wuvDVozpYWLgXEI6om-A7yHJRay4pnsxAAOorYf9OAPVqQzaoa6B1l/exec';
+var DATA = [];
+var dataLoaded = false;
+
+function g(row, key) { return (row[key] || '').toString().trim(); }
+
+function parseSheetRows(rows) {
+  var out = [];
+  rows.forEach(function(row) {
+    var col1 = g(row, 'Timestamp');  // บางแถว = วันที่, บางแถว = SFD-
+    var col2 = g(row, 'REF');        // บางแถว = SFD-, บางแถว = วันที่
+
+    var ref, ts;
+    // ตรวจว่าอันไหนเป็น REF จริง
+    if (col1.indexOf('SFD-') === 0) {
+      ref = col1; ts = col2;
+    } else if (col2.indexOf('SFD-') === 0) {
+      ref = col2; ts = col1;
+    } else {
+      return; // ไม่มี SFD ในทั้งสองคอลัมน์ → ข้ามแถวนี้
+    }
+
+    // แปลง timestamp ให้อ่านง่าย (กรณีเป็น ISO หรือ GMT string)
+    var tsClean = ts;
+    try {
+      var d = new Date(ts);
+      if (!isNaN(d.getTime())) {
+        tsClean = d.toLocaleString('th-TH', {
+          day:'2-digit', month:'2-digit', year:'numeric',
+          hour:'2-digit', minute:'2-digit', hour12:false,
+          timeZone:'Asia/Bangkok'
+        });
+      }
+    } catch(e) {}
+
+    // salesUser มาจาก Status (ชื่อคน) ถ้าไม่ใช่ pending/approved/rejected
+    var statusVal = g(row, 'Status');
+    var knownStatus = ['pending','approved','rejected','partial'];
+    var salesUser = (knownStatus.indexOf(statusVal.toLowerCase()) === -1 && statusVal) ? statusVal : '';
+
+    // ideaPrice — ไม่ใส่ $ ถ้าว่าง
+    var ideaRaw = g(row, 'Idea Price');
+    var ideaDisplay = ideaRaw ? (ideaRaw.indexOf('$') === 0 ? ideaRaw : '$' + ideaRaw) : '';
+
+    // offerPrice — strip $ ถ้ามี
+    var offerRaw = g(row, 'ราคาเสนอ (USD/MT)');
+    var offerClean = offerRaw.replace('$','').trim();
+
+    out.push({
+      ref:       ref,
+      ts:        tsClean,
+      company:   g(row, 'Company'),
+      contact:   g(row, 'Contact'),
+      country:   g(row, 'Country'),
+      port:      g(row, 'Destination Port'),
+      incoterm:  g(row, 'Incoterm') || 'CFR',
+      payment:   g(row, 'Payment Term'),
+      orderType: g(row, 'Order Type'),
+      salesUser: salesUser,
+      isTest:    false,
+      products: [{
+        type:      g(row, 'Product'),
+        spec:      g(row, 'Specification'),
+        qty:       g(row, 'Quantity Request (FCL/MT)'),
+        months:    g(row, 'Shipment Request'),
+        ideaPrice: ideaDisplay,
+        marginIdea:g(row, '%Margin (Idea)')
+      }],
+      alloc:      g(row, 'จัดสรรเนื้อ'),
+      lastClosed: g(row, 'ราคาปิดการขายล่าสุด'),
+      lastOffer:  g(row, 'ราคาเสนอล่าสุด'),
+      currency:   g(row, 'ค่าเงิน'),
+      other:      g(row, 'อื่นๆ'),
+      period:     g(row, 'Shipment ที่จะเสนอ'),
+      offerPrice: offerClean,
+      offerMargin:g(row, '%Margin (Offer)'),
+      totalQty:   g(row, 'Total Quantity (MT)'),
+      qtyMonth:   g(row, 'Quantity per Month (MT)'),
+      remark:     g(row, 'หมายเหตุ')
+    });
+  });
+  return out;
+}
+
+function loadData() {
+  var c = document.getElementById('cards');
+  c.innerHTML = '<div class="empty-state"><div class="ei">⏳</div><h3>กำลังโหลดข้อมูล...</h3><p style="margin-top:8px;font-size:13px;color:#888">ดึงข้อมูลจาก Google Sheets</p></div>';
+  fetch(API_URL)
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      var rows = json.data || json || [];
+      DATA = parseSheetRows(rows);
+      dataLoaded = true;
+      document.getElementById('last-updated').textContent = 'อัปเดต: ' + new Date().toLocaleTimeString('th-TH');
+      renderCards();
+    })
+    .catch(function(err){
+      c.innerHTML = '<div class="empty-state"><div class="ei">⚠️</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p style="margin-top:8px;font-size:13px;color:#888">กรุณาลองใหม่</p><button onclick="loadData()" style="margin-top:16px;padding:8px 20px;background:var(--red);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:Kanit,sans-serif;font-size:14px;">🔄 ลองใหม่</button></div>';
+      console.error(err);
+    });
+}
+
+// placeholder ให้ code เก่าไม่ error ก่อน loadData เสร็จ
+var _PLACEHOLDER = [
+  {
+    ref: 'SFD-2026-9566',
+    ts: '16/05/2026 21:38',
+    company: 'Sunfood',
+    contact: 'nn',
+    country: 'Japan',
+    port: 'JMP',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NET',
+    isTest: false,
+    products: [
+      { type: 'BLK 25-30', spec: '', qty: '120 MT', months: 'OCT', ideaPrice: '$4,000', marginIdea: '' }
+    ],
+    alloc: '72 MT/month',
+    lastClosed: '$3,800',
+    lastOffer: '',
+    currency: 'JPY 157',
+    other: '',
+    period: 'OCT/NOV',
+    offerPrice: '4,250',
+    offerMargin: '30',
+    totalQty: '48 MT',
+    qtyMonth: '48 MT',
+    remark: ''
+  },
+  {
+    ref: 'SFD-2026-8392',
+    ts: '15/05/2026 23:51',
+    company: 'Test',
+    contact: 'Test',
+    country: 'Japan',
+    port: 'Test',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: '',
+    isTest: true,
+    products: [
+      { type: 'Test', spec: '', qty: '', months: '', ideaPrice: '', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'Test', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-7096',
+    ts: '17/05/2026 00:32',
+    company: 'a',
+    contact: '',
+    country: '',
+    port: 'a',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: '',
+    isTest: true,
+    products: [
+      { type: 'a', spec: '', qty: '', months: '', ideaPrice: '', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: '', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-1000',
+    ts: '16/05/2026 18:28',
+    company: 'ก',
+    contact: 'ก',
+    country: '',
+    port: '',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NICHA',
+    isTest: true,
+    products: [
+      { type: '', spec: '', qty: '1', months: '', ideaPrice: 'a', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'a', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-9017',
+    ts: '16/05/2026 18:29',
+    company: 'a',
+    contact: 'a',
+    country: '',
+    port: '',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NICHA',
+    isTest: true,
+    products: [
+      { type: '', spec: '', qty: '1', months: '', ideaPrice: 'a', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'a', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-2681',
+    ts: '16/05/2026 18:33',
+    company: 'a',
+    contact: 'a',
+    country: '',
+    port: '',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NICHA',
+    isTest: true,
+    products: [
+      { type: '', spec: '', qty: '1', months: '', ideaPrice: 'a', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'a', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-7719',
+    ts: '16/05/2026 18:34',
+    company: 'a',
+    contact: 'a',
+    country: '',
+    port: '',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NICHA',
+    isTest: true,
+    products: [
+      { type: '', spec: '', qty: '1', months: '', ideaPrice: 'a', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'aaaaa', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-1253',
+    ts: '16/05/2026 18:38',
+    company: 'asd',
+    contact: 'asd',
+    country: '',
+    port: '',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NICHA',
+    isTest: true,
+    products: [
+      { type: '', spec: '', qty: '1', months: '', ideaPrice: 'asd', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'asd', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-6083',
+    ts: '16/05/2026 18:42',
+    company: 'asd',
+    contact: 'asd',
+    country: '',
+    port: '',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NICHA',
+    isTest: true,
+    products: [
+      { type: '', spec: '', qty: '1', months: '', ideaPrice: 'asd', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'asd', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  },
+  {
+    ref: 'SFD-2026-2842',
+    ts: '16/05/2026 18:43',
+    company: 'TEST2',
+    contact: 'TEST2',
+    country: '',
+    port: '',
+    incoterm: 'CFR',
+    payment: 'LC at Sight',
+    orderType: 'ออเดอร์ต่อเนื่อง',
+    salesUser: 'NICHA',
+    isTest: true,
+    products: [
+      { type: '', spec: '', qty: '1', months: '', ideaPrice: 'TEST2', marginIdea: '' }
+    ],
+    alloc: '', lastClosed: '', lastOffer: '', currency: '', other: '',
+    period: 'TEST2', offerPrice: '', offerMargin: '', totalQty: '', qtyMonth: '', remark: ''
+  }
+]; // end _PLACEHOLDER (ไม่ได้ใช้แล้ว — ข้อมูลจริงมาจาก loadData())
+
+// ── LOGIN — password only ──
+function doLogin() {
+  var pw = document.getElementById('pw').value;
+  var err = document.getElementById('pw-err');
+  if (pw !== PASS) { err.classList.add('show'); document.getElementById('pw').value = ''; return; }
+  err.classList.remove('show');
+  curUser = 'Approver 1'; curKey = 'A1';
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('hdr-user').textContent = curUser;
+  loadData(); // ดึงข้อมูลสดจาก Google Sheets
+}
+
+function doLogout() {
+  curUser = null; curKey = null; DATA = [];
+  document.getElementById('pw').value = '';
+  document.getElementById('login-overlay').style.display = 'flex';
+}
+
+// ── FILTER ──
+function setFilter(f, btn) {
+  curFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderCards();
+}
+
+// ── STATUS ──
+function getStatus(ref) {
+  var a = approvals[ref] || {}; var v1 = a.A1; var v2 = a.A2;
+  if (!v1 && !v2) return 'pending';
+  if (v1 === 'rejected' || v2 === 'rejected') return 'rejected';
+  if (v1 === 'approved' && v2 === 'approved') return 'approved';
+  if (v1 || v2) return 'partial';
+  return 'pending';
+}
+
+function badge(status) {
+  var m = { pending:['badge-pending','⏳ รออนุมัติ'], approved:['badge-approved','✅✅ อนุมัติครบ'], rejected:['badge-rejected','❌ ปฏิเสธ'], partial:['badge-partial','✅ Approve 1 แล้ว'] };
+  var s = m[status] || m.pending;
+  return '<span class="status-badge ' + s[0] + '">' + s[1] + '</span>';
+}
+
+function mgClass(m) {
+  var n = parseFloat(m);
+  if (isNaN(n)) return '';
+  if (n >= 35) return 'mg-h';
+  if (n >= 20) return 'mg-m';
+  return 'mg-l';
+}
+
+// ── VOTE ──
+function vote(ref, slot, dec) {
+  if (!curKey) { showToast('กรุณาเข้าสู่ระบบก่อน'); return; }
+  if (!approvals[ref]) approvals[ref] = {};
+  approvals[ref][slot] = dec;
+  showToast(dec === 'approved' ? '✅ ' + slot + ' อนุมัติสำเร็จ' : '❌ ' + slot + ' ปฏิเสธสำเร็จ', dec === 'approved' ? 'green' : 'red');
+  renderCards();
+}
+
+function undoVote(ref, slot) {
+  if (approvals[ref]) delete approvals[ref][slot];
+  showToast('↩ ยกเลิก ' + slot + ' แล้ว');
+  renderCards();
+}
+
+// ── RENDER ──
+function renderCards() {
+  var data = DATA;
+  var filt = data.filter(function(d){ return getStatus(d.ref) === curFilter; });
+
+  document.getElementById('st-total').textContent = data.length;
+  document.getElementById('st-pend').textContent  = data.filter(function(d){ return getStatus(d.ref) === 'pending'; }).length;
+  document.getElementById('st-appr').textContent  = data.filter(function(d){ return getStatus(d.ref) === 'approved'; }).length;
+  document.getElementById('st-rej').textContent   = data.filter(function(d){ return getStatus(d.ref) === 'rejected'; }).length;
+  document.getElementById('sec-count').textContent = 'แสดง ' + filt.length + ' จาก ' + data.length + ' รายการ';
+
+  var c = document.getElementById('cards');
+  if (!curUser) { c.innerHTML = '<div class="empty-state"><div class="ei">🔐</div><h3>กรุณาเข้าสู่ระบบ</h3></div>'; return; }
+  if (!filt.length) { c.innerHTML = '<div class="empty-state"><div class="ei">🔍</div><h3>ไม่พบรายการ</h3></div>'; return; }
+
+  var isAppr = !!curUser;
+  var html = '';
+
+  filt.forEach(function(d) {
+    var status = getStatus(d.ref);
+    var av = approvals[d.ref] || {}; var v1 = av.A1; var v2 = av.A2;
+
+    var pRows = '';
+    (d.products || []).forEach(function(p) {
+      var mc = mgClass(p.marginIdea || d.offerMargin);
+      pRows += '<tr>' +
+        '<td><div class="pt">' + (p.type || '—') + '</div>' + (p.spec ? '<div class="pc">' + p.spec + '</div>' : '') + '</td>' +
+        '<td style="color:#555">' + (p.qty || '—') + '</td>' +
+        '<td style="color:#555">' + (p.months || '—') + '</td>' +
+        '<td><span class="pv">' + (p.ideaPrice || '—') + '</span></td>' +
+        '<td><span class="mg ' + mc + '">' + (p.marginIdea || d.offerMargin || '—') + (p.marginIdea || d.offerMargin ? '%' : '') + '</span></td>' +
+        '</tr>';
+    });
+
+    var hist = '';
+    if (d.alloc || d.lastClosed || d.currency) {
+      hist = '<div class="hist-section"><strong>📜 ข้อมูลประกอบ</strong>' +
+        (d.alloc ? 'จัดสรร: <b>' + d.alloc + '</b>&nbsp;&nbsp; ' : '') +
+        (d.lastClosed ? 'ราคาปิดล่าสุด: <b>' + d.lastClosed + '</b>&nbsp;&nbsp; ' : '') +
+        (d.lastOffer ? 'เสนอล่าสุด: <b>' + d.lastOffer + '</b>&nbsp;&nbsp; ' : '') +
+        (d.currency ? 'ค่าเงิน: <b>' + d.currency + '</b>' : '') +
+        (d.other ? '&nbsp;&nbsp; อื่นๆ: <b>' + d.other + '</b>' : '') +
+        '</div>';
+    }
+
+    var offerDetail = '';
+    if (d.period || d.offerPrice || d.offerMargin || d.qtyMonth) {
+      offerDetail = '<div class="offer-detail">' +
+        (d.period ? '<div class="detail-cell"><div class="dl">Shipment ที่เสนอ</div><div class="dv">' + d.period + '</div></div>' : '') +
+        (d.offerPrice ? '<div class="detail-cell"><div class="dl">ราคาเสนอ</div><div class="dv dv-red">$' + d.offerPrice + '/MT</div></div>' : '') +
+        (d.offerMargin ? '<div class="detail-cell"><div class="dl">%Margin</div><div class="dv ' + (mgClass(d.offerMargin) === 'mg-h' ? 'dv-green' : mgClass(d.offerMargin) === 'mg-l' ? 'dv-red' : '') + '">' + d.offerMargin + '%</div></div>' : '') +
+        (d.qtyMonth ? '<div class="detail-cell"><div class="dl">Qty/Month</div><div class="dv">' + d.qtyMonth + '</div></div>' : '') +
+        (d.totalQty ? '<div class="detail-cell"><div class="dl">Total Qty</div><div class="dv">' + d.totalQty + '</div></div>' : '') +
+        '</div>';
+    }
+
+    var approveHtml = '';
+    if (isAppr) {
+      var dec1 = av.A1; var dec2 = av.A2;
+      var rem = (approvals[d.ref] || {}).remark || '';
+
+      function slotHtml(slot, dec) {
+        var label = slot === 'A1' ? 'Approve 1' : 'Approve 2';
+        if (dec) {
+          return '<div class="vote-slot-wrap">' +
+            '<div class="slot-label">' + label + '</div>' +
+            '<div class="vote-result ' + dec + '">' +
+              (dec === 'approved' ? '✅ อนุมัติแล้ว' : '❌ ปฏิเสธแล้ว') +
+              '<button class="btn-undo" onclick="undoVote(\'' + d.ref + '\',\'' + slot + '\')">ยกเลิก</button>' +
+            '</div>' +
+          '</div>';
+        }
+        return '<div class="vote-slot-wrap">' +
+          '<div class="slot-label">' + label + '</div>' +
+          '<div class="vote-buttons">' +
+            '<button class="vote-btn btn-approve" onclick="vote(\'' + d.ref + '\',\'' + slot + '\',\'approved\')">✅ Approve</button>' +
+            '<button class="vote-btn btn-reject"  onclick="vote(\'' + d.ref + '\',\'' + slot + '\',\'rejected\')">❌ Reject</button>' +
+          '</div>' +
+        '</div>';
+      }
+
+      approveHtml = '<div class="approve-section">' +
+        '<div class="approve-slots">' +
+          slotHtml('A1', dec1) +
+          '<div class="slot-divider"></div>' +
+          slotHtml('A2', dec2) +
+        '</div>' +
+        '<div class="remark-area"><label>หมายเหตุ</label><textarea id="rem-' + d.ref + '" placeholder="ความเห็น / เงื่อนไข...">' + rem + '</textarea></div>' +
+      '</div>';
+    }
+
+    var stripeClass = 'stripe-' + status;
+
+    html += '<div class="offer-card status-' + status + '">' +
+      '<div class="card-stripe ' + stripeClass + '"></div>' +
+      '<div class="card-header">' +
+        '<div>' +
+          '<div class="card-ref">' + d.ref + (d.isTest ? '<span class="test-badge">TEST</span>' : '') + '</div>' +
+          '<div class="card-company">' + (d.company || '—') + '</div>' +
+          '<div class="card-tags">' +
+            (d.salesUser ? '<span class="tag tag-sales">👤 ' + d.salesUser + '</span>' : '') +
+            (d.port ? '<span class="tag tag-port">🚢 ' + d.port + '</span>' : '') +
+            (d.country ? '<span class="tag tag-country">🌏 ' + d.country + '</span>' : '') +
+            (d.incoterm ? '<span class="tag tag-incoterm">' + d.incoterm + '</span>' : '') +
+            (d.payment ? '<span class="tag tag-payment">' + d.payment + '</span>' : '') +
+            (d.orderType ? '<span class="tag tag-order">' + d.orderType + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="card-status-area">' + badge(status) + '<div class="card-ts">🕐 ' + (d.ts || '—') + '</div></div>' +
+      '</div>' +
+      offerDetail +
+      '<div class="card-products">' +
+        '<div class="prod-lbl">🐔 รายการสินค้า</div>' +
+        '<table class="prod-table"><thead><tr><th>สินค้า / Product</th><th>Qty Request</th><th>Shipment</th><th>Idea Price</th><th>%Margin (Idea)</th></tr></thead>' +
+        '<tbody>' + (pRows || '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:14px">ไม่มีข้อมูลสินค้า</td></tr>') + '</tbody></table>' +
+      '</div>' +
+      hist +
+      (d.remark ? '<div class="remark-row"><b>หมายเหตุ:</b> ' + d.remark + '</div>' : '') +
+      approveHtml +
+    '</div>';
+  });
+
+  c.innerHTML = html;
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(function(){ t.className = 'toast'; }, 2800);
+}
+
+renderCards();
+</script>
+</body>
+</html>
