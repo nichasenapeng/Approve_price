@@ -399,7 +399,7 @@ var curUser = null, curKey = null, curFilter = 'pending';
 var approvals = {};
 
 // ── LIVE DATA จาก Google Sheets via Apps Script ──
-var API_URL = 'https://script.google.com/macros/s/AKfycby4Vatj3pvsM0AsBLLCt0hyKhddEX3DmqQUSnlcEDzANre9MwQL4kzVrk8PLbRy2NEG/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwnLuaPuStqFV74bqp10f4oQ9YSKzry8NFc493gHOZEzHio045FzAljBNvKGjOhPKxf/exec';
 var DATA = [];
 var dataLoaded = false;
 
@@ -408,20 +408,19 @@ function g(row, key) { return (row[key] || '').toString().trim(); }
 function parseSheetRows(rows) {
   var out = [];
   rows.forEach(function(row) {
-    var col1 = g(row, 'Timestamp');  // บางแถว = วันที่, บางแถว = SFD-
-    var col2 = g(row, 'REF');        // บางแถว = SFD-, บางแถว = วันที่
+    var col1 = g(row, 'Timestamp');
+    var col2 = g(row, 'REF');
 
     var ref, ts;
-    // ตรวจว่าอันไหนเป็น REF จริง
     if (col1.indexOf('SFD-') === 0) {
       ref = col1; ts = col2;
     } else if (col2.indexOf('SFD-') === 0) {
       ref = col2; ts = col1;
     } else {
-      return; // ไม่มี SFD ในทั้งสองคอลัมน์ → ข้ามแถวนี้
+      return;
     }
 
-    // แปลง timestamp ให้อ่านง่าย (กรณีเป็น ISO หรือ GMT string)
+    // แปลง timestamp
     var tsClean = ts;
     try {
       var d = new Date(ts);
@@ -434,24 +433,49 @@ function parseSheetRows(rows) {
       }
     } catch(e) {}
 
-    // salesUser มาจาก Status (ชื่อคน) ถ้าไม่ใช่ pending/approved/rejected
+    // salesUser
     var statusVal = g(row, 'Status');
     var knownStatus = ['pending','approved','rejected','partial'];
     var salesUser = (knownStatus.indexOf(statusVal.toLowerCase()) === -1 && statusVal) ? statusVal : '';
 
-    // ideaPrice — ไม่ใส่ $ ถ้าว่าง
-    var ideaRaw = g(row, 'Idea Price');
-    var ideaDisplay = ideaRaw ? (ideaRaw.indexOf('$') === 0 ? ideaRaw : '$' + ideaRaw) : '';
-
-    // offerPrice — strip $ ถ้ามี
+    // offerPrice
     var offerRaw = g(row, 'ราคาเสนอ (USD/MT)');
     var offerClean = offerRaw.replace('$','').trim();
 
-    // อ่าน approval status ที่ Apps Script merge มาจาก sheet 2
-    // column headers: 'Approve 1', 'Approve 2', 'สถานะรวม', 'หมายเหตุ Approver'
+    // approval จาก sheet 2
     var sheetA1     = g(row, 'Approve 1');
     var sheetA2     = g(row, 'Approve 2');
     var sheetRemark = g(row, 'หมายเหตุ Approver');
+
+    // ── products: รับทั้ง array (จาก Apps Script ใหม่) และ single row (เดิม) ──
+    var products = [];
+    if (Array.isArray(row.products) && row.products.length > 0) {
+      // Apps Script grouped แล้ว → แปลงแต่ละ product
+      products = row.products.map(function(p) {
+        var ip = (p['Idea Price'] || '').toString().trim();
+        var ipDisplay = ip ? (ip.indexOf('$') === 0 ? ip : '$' + ip) : '';
+        return {
+          type:       (p['Product'] || '').toString().trim(),
+          spec:       (p['Specification'] || '').toString().trim(),
+          qty:        (p['Quantity Request (FCL/MT)'] || '').toString().trim(),
+          months:     (p['Shipment Request'] || '').toString().trim(),
+          ideaPrice:  ipDisplay,
+          marginIdea: (p['%Margin (Idea)'] || '').toString().trim()
+        };
+      });
+    } else {
+      // fallback: single row แบบเดิม
+      var ideaRaw = g(row, 'Idea Price');
+      var ideaDisplay = ideaRaw ? (ideaRaw.indexOf('$') === 0 ? ideaRaw : '$' + ideaRaw) : '';
+      products = [{
+        type:      g(row, 'Product'),
+        spec:      g(row, 'Specification'),
+        qty:       g(row, 'Quantity Request (FCL/MT)'),
+        months:    g(row, 'Shipment Request'),
+        ideaPrice: ideaDisplay,
+        marginIdea:g(row, '%Margin (Idea)')
+      }];
+    }
 
     out.push({
       ref:       ref,
@@ -465,14 +489,7 @@ function parseSheetRows(rows) {
       orderType: g(row, 'Order Type'),
       salesUser: salesUser,
       isTest:    false,
-      products: [{
-        type:      g(row, 'Product'),
-        spec:      g(row, 'Specification'),
-        qty:       g(row, 'Quantity Request (FCL/MT)'),
-        months:    g(row, 'Shipment Request'),
-        ideaPrice: ideaDisplay,
-        marginIdea:g(row, '%Margin (Idea)')
-      }],
+      products:  products,
       alloc:      g(row, 'จัดสรรเนื้อ'),
       lastClosed: g(row, 'ราคาปิดการขายล่าสุด'),
       lastOffer:  g(row, 'ราคาเสนอล่าสุด'),
@@ -484,7 +501,6 @@ function parseSheetRows(rows) {
       totalQty:   g(row, 'Total Quantity (MT)'),
       qtyMonth:   g(row, 'Quantity per Month (MT)'),
       remark:     g(row, 'หมายเหตุ'),
-      // approval จาก sheet 2 (merge โดย Apps Script)
       _sheetA1:     sheetA1,
       _sheetA2:     sheetA2,
       _sheetRemark: sheetRemark
