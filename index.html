@@ -399,7 +399,7 @@ var curUser = null, curKey = null, curFilter = 'pending';
 var approvals = {};
 
 // ── LIVE DATA จาก Google Sheets via Apps Script ──
-var API_URL = 'https://script.google.com/macros/s/AKfycbwX2cxpdPFlA9wuvDVozpYWLgXEI6om-A7yHJRay4pnsxAAOorYf9OAPVqQzaoa6B1l/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycby4Vatj3pvsM0AsBLLCt0hyKhddEX3DmqQUSnlcEDzANre9MwQL4kzVrk8PLbRy2NEG/exec';
 var DATA = [];
 var dataLoaded = false;
 
@@ -447,6 +447,12 @@ function parseSheetRows(rows) {
     var offerRaw = g(row, 'ราคาเสนอ (USD/MT)');
     var offerClean = offerRaw.replace('$','').trim();
 
+    // อ่าน approval status ที่ Apps Script merge มาจาก sheet 2
+    // column headers: 'Approve 1', 'Approve 2', 'สถานะรวม', 'หมายเหตุ Approver'
+    var sheetA1     = g(row, 'Approve 1');
+    var sheetA2     = g(row, 'Approve 2');
+    var sheetRemark = g(row, 'หมายเหตุ Approver');
+
     out.push({
       ref:       ref,
       ts:        tsClean,
@@ -477,7 +483,11 @@ function parseSheetRows(rows) {
       offerMargin:g(row, '%Margin (Offer)'),
       totalQty:   g(row, 'Total Quantity (MT)'),
       qtyMonth:   g(row, 'Quantity per Month (MT)'),
-      remark:     g(row, 'หมายเหตุ')
+      remark:     g(row, 'หมายเหตุ'),
+      // approval จาก sheet 2 (merge โดย Apps Script)
+      _sheetA1:     sheetA1,
+      _sheetA2:     sheetA2,
+      _sheetRemark: sheetRemark
     });
   });
   return out;
@@ -492,6 +502,19 @@ function loadData() {
       var rows = json.data || json || [];
       DATA = parseSheetRows(rows);
       dataLoaded = true;
+
+      // ── Restore approvals จาก sheet 2 (Approve 1 / Approve 2) ──
+      var validVals = ['approved', 'rejected'];
+      DATA.forEach(function(d) {
+        if (!approvals[d.ref]) approvals[d.ref] = {};
+        if (!approvals[d.ref].A1 && validVals.indexOf(d._sheetA1) !== -1)
+          approvals[d.ref].A1 = d._sheetA1;
+        if (!approvals[d.ref].A2 && validVals.indexOf(d._sheetA2) !== -1)
+          approvals[d.ref].A2 = d._sheetA2;
+        if (!approvals[d.ref].remark && d._sheetRemark)
+          approvals[d.ref].remark = d._sheetRemark;
+      });
+
       document.getElementById('last-updated').textContent = 'อัปเดต: ' + new Date().toLocaleTimeString('th-TH');
       renderCards();
     })
@@ -774,6 +797,7 @@ function vote(ref, slot, dec) {
 
   fetch(API_URL, {
     method: 'POST',
+    mode: 'no-cors',          // ✅ แก้ CORS สำหรับ Apps Script
     body: JSON.stringify(payload)
   }).catch(function(){});  // silent fail — approval ยังทำงานใน UI
 
