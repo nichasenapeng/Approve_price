@@ -394,12 +394,12 @@ html,body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--ink)
 <div class="toast" id="toast"></div>
 
 <script>
-var PASS = '1234';
+var PASS = '362254';
 var curUser = null, curKey = null, curFilter = 'pending';
 var approvals = {};
 
 // ── LIVE DATA จาก Google Sheets via Apps Script ──
-var API_URL = 'https://script.google.com/macros/s/AKfycbwnLuaPuStqFV74bqp10f4oQ9YSKzry8NFc493gHOZEzHio045FzAljBNvKGjOhPKxf/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbxZz4nc_TIBGaoqGLvrMFnPFAtwbZSdynfgh70W2MHfHOeMLjQ1CCxbzF31vfgD1Gb_/exec';
 var DATA = [];
 var dataLoaded = false;
 
@@ -795,12 +795,12 @@ function vote(ref, slot, dec) {
   var status = getStatus(ref);
   var rem = document.getElementById('rem-' + ref);
 
-  // ส่งไป Apps Script → บันทึกลง Sheet ใหม่
+  // ส่งไป Apps Script → บันทึกลง Sheet 2
   var payload = {
     ref:        ref,
     company:    d.company || '',
     port:       d.port || '',
-    product:    (d.products && d.products[0]) ? d.products[0].type : '',
+    products:   (d.products || []).map(function(p){ return { type: p.type || '' }; }),
     offerPrice: d.offerPrice || '',
     offerMargin:d.offerMargin || '',
     qtyMonth:   d.qtyMonth || '',
