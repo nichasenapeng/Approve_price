@@ -832,7 +832,19 @@ function undoVote(ref, slot) {
 }
 
 // ── RENDER ──
+function saveRemarks() {
+  // บันทึกค่า textarea ปัจจุบันลง approvals ก่อน re-render
+  DATA.forEach(function(d) {
+    var el1 = document.getElementById('rem-A1-' + d.ref);
+    var el2 = document.getElementById('rem-A2-' + d.ref);
+    if (!approvals[d.ref]) approvals[d.ref] = {};
+    if (el1) approvals[d.ref].remarkA1 = el1.value;
+    if (el2) approvals[d.ref].remarkA2 = el2.value;
+  });
+}
+
 function renderCards() {
+  saveRemarks();
   var data = DATA;
   var filt = data.filter(function(d){ return getStatus(d.ref) === curFilter; });
 
